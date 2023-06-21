@@ -1,6 +1,6 @@
-# rk8s
+# Rk8s - A Kubernetes Distribution with Rust
 
-A deploy tool helps you set up a working kubernetes cluster in just a few steps.
+For now, we are woking on a deploy tool helps you set up a working kubernetes cluster in just a few steps.
 
 ## Usage
 
