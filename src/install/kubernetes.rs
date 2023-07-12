@@ -44,15 +44,15 @@ pub fn start(config: &Config) {
             .arg("/opt/kubernetes/bin")
             .status()
             .expect("Error happened when trying to copy `kubernetes` executable to `/opt/kubernetes/bin`");
-        
+
         // Prepare content to be sent to worker nodes.
         let kubernetes_bin = PathBuf::from("to_send/kubernetes/bin");
         check_dir_exist_or_create(kubernetes_bin);
-        let kubernetes_cfg= PathBuf::from("to_send/kubernetes/cfg");
+        let kubernetes_cfg = PathBuf::from("to_send/kubernetes/cfg");
         check_dir_exist_or_create(kubernetes_cfg);
-        let kubernetes_ssl= PathBuf::from("to_send/kubernetes/ssl");
+        let kubernetes_ssl = PathBuf::from("to_send/kubernetes/ssl");
         check_dir_exist_or_create(kubernetes_ssl);
-        let kubernetes_logs= PathBuf::from("to_send/kubernetes/logs");
+        let kubernetes_logs = PathBuf::from("to_send/kubernetes/logs");
         check_dir_exist_or_create(kubernetes_logs);
         Command::new("cp")
             .arg("k8s/kubernetes/server/bin/kube-proxy")

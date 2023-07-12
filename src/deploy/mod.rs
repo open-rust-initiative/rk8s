@@ -1,10 +1,10 @@
-pub mod pre_check;
-pub mod etcd;
 pub mod docker;
-pub mod prepare_kube;
+pub mod etcd;
 pub mod kube_apiserver;
 pub mod kube_controller_manager;
+pub mod kube_proxy;
 pub mod kube_scheduler;
 pub mod kubectl;
 pub mod kubelet;
-pub mod kube_proxy;
+pub mod pre_check;
+pub mod prepare_kube;

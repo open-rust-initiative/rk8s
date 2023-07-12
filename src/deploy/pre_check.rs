@@ -6,8 +6,8 @@ use std::process::Command;
 pub fn start(config: &Config) {
     tracing::info!("Pre check started");
     fs::create_dir("pre_check").unwrap();
-    let mut k8s_conf = File::create("k8s.conf")
-        .expect("Error happened when trying to create `k8s.conf` file");
+    let mut k8s_conf =
+        File::create("k8s.conf").expect("Error happened when trying to create `k8s.conf` file");
     k8s_conf
         .write_all(
             b"net.bridge.bridge-nf-call-ip6tables = 1\nnet.bridge.bridge-nf-call-iptables = 1\n",
@@ -16,9 +16,7 @@ pub fn start(config: &Config) {
     let mut k8s_module = File::create("pre_check/k8s.conf")
         .expect("Error happened when trying to create `k8s.conf` file");
     k8s_module
-        .write_all(
-            b"br_netfilter\n",
-        )
+        .write_all(b"br_netfilter\n")
         .expect("Error happened when trying to write to `/etc/sysctl.d/k8s.conf`");
 
     for (ip, name) in &config.instance_hosts {
@@ -92,7 +90,7 @@ pub fn start(config: &Config) {
             .arg(format!("root@{}:/etc/modules-load.d", ip))
             .status()
             .expect("Error happened when trying to send files to other nodes");
-        
+
         Command::new("ssh")
             .arg(format!("root@{}", ip))
             .arg("sysctl --system")

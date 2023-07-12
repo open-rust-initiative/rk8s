@@ -1,12 +1,11 @@
 use crate::config::Config;
 use serde::{Deserialize, Serialize};
+use std::env;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::env;
 use std::process::{Command, Stdio};
 use std::thread;
-
 
 #[derive(Serialize, Deserialize, Debug)]
 struct CAConfig {
@@ -107,7 +106,7 @@ impl ServerCsr {
             CN: config.etcd_CN.to_owned(),
             hosts: {
                 let mut hosts = Vec::new();
-                for (ip, _) in &config.instance_hosts {
+                for ip in config.instance_hosts.keys() {
                     hosts.push(ip.to_owned());
                 }
                 hosts
@@ -134,12 +133,8 @@ impl ETCDCfg {
 
         writeln!(&mut etcd_conf, "#[Member]")
             .expect("Error happened when trying to write `etcd.conf`");
-        writeln!(
-            &mut etcd_conf,
-            "ETCD_NAME=\"etcd_{}\"",
-            current_name
-        )
-        .expect("Error happened when trying to write `etcd.conf`");
+        writeln!(&mut etcd_conf, "ETCD_NAME=\"etcd_{}\"", current_name)
+            .expect("Error happened when trying to write `etcd.conf`");
         writeln!(
             &mut etcd_conf,
             "ETCD_DATA_DIR=\"/var/lib/etcd/default.etcd\""
@@ -157,7 +152,7 @@ impl ETCDCfg {
             current_ip
         )
         .expect("Error happened when trying to write `etcd.conf`");
-        writeln!(&mut etcd_conf, "").expect("Error happened when trying to write `etcd.conf`");
+        writeln!(&mut etcd_conf).expect("Error happened when trying to write `etcd.conf`");
         writeln!(&mut etcd_conf, "#[Clustering]")
             .expect("Error happened when trying to write `etcd.conf`");
         writeln!(
@@ -224,7 +219,6 @@ WantedBy=multi-user.target
     }
 }
 
-
 pub fn start(config: &Config) {
     // Deploy etcd to all hosts according to their name.
     // Etcd does not distinguish masters or workers.
@@ -232,7 +226,7 @@ pub fn start(config: &Config) {
     tracing::info!("Change working directory into `etcd`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/etcd");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `etcd`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `etcd`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     tracing::info!("Start generating `ca-config.json`...");
@@ -311,7 +305,7 @@ pub fn start(config: &Config) {
     check_dir_exist_or_create(bin_path);
     let ssl_path = PathBuf::from("to_send/etcd/ssl");
     check_dir_exist_or_create(ssl_path);
-    for (ip, _) in &config.instance_hosts {
+    for ip in config.instance_hosts.keys() {
         let path = PathBuf::from("to_send");
         let path = path.join(ip);
         check_dir_exist_or_create(path);
@@ -401,7 +395,7 @@ pub fn start(config: &Config) {
         handle.join().unwrap();
     }
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `etcd`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `etcd`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()

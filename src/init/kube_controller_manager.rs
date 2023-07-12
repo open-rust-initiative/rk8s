@@ -1,9 +1,9 @@
 use crate::config::Config;
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::path::Path;
 use std::fs::File;
 use std::io::Write;
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 struct KubeControllerManagerCfg;
@@ -17,7 +17,7 @@ impl KubeControllerManagerCfg {
 
         writeln!(
             &mut controller_conf,
-r#"KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=false \
+            r#"KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=false \
 --v=2 \
 --log-dir=/opt/kubernetes/logs \
 --leader-elect=true \
@@ -86,8 +86,9 @@ struct KubeControllerManagerUnit;
 
 impl KubeControllerManagerUnit {
     fn generate() {
-        let mut kube_controller_unit = File::create("/usr/lib/systemd/system/kube-controller-manager.service")
-            .expect("Error happened when trying to create kube-controller-manager unit file");
+        let mut kube_controller_unit =
+            File::create("/usr/lib/systemd/system/kube-controller-manager.service")
+                .expect("Error happened when trying to create kube-controller-manager unit file");
         let content = r#"[Unit]
 Description=Kubernetes Controller Manager
 Documentation=https://github.com/kubernetes/kubernetes
@@ -112,7 +113,7 @@ pub fn start(config: &Config) {
     tracing::info!("Change working directory into `k8s`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/k8s");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `k8s`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `k8s`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     tracing::info!("Generating `kube-controller-manager.conf` to /opt/kubernetes/cfg...");
@@ -209,7 +210,7 @@ pub fn start(config: &Config) {
         .expect("Error happened when trying to start `kube-controller-manager.service`");
     tracing::info!("Master's controller manager is now set");
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `/rk8s`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `/rk8s`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()

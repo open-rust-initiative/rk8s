@@ -105,7 +105,7 @@ impl ServerCsr {
             CN: config.etcd_CN.to_owned(),
             hosts: {
                 let mut hosts = Vec::new();
-                for (ip, _) in &config.instance_hosts {
+                for ip in config.instance_hosts.keys() {
                     hosts.push(ip.to_owned());
                 }
                 hosts
@@ -155,7 +155,7 @@ impl ETCDCfg {
             config.instance_ip
         )
         .expect("Error happened when trying to write `etcd.conf`");
-        writeln!(&mut etcd_conf, "").expect("Error happened when trying to write `etcd.conf`");
+        writeln!(&mut etcd_conf).expect("Error happened when trying to write `etcd.conf`");
         writeln!(&mut etcd_conf, "#[Clustering]")
             .expect("Error happened when trying to write `etcd.conf`");
         writeln!(
@@ -227,7 +227,7 @@ pub fn start(config: &Config) {
     tracing::info!("Change working directory into `etcd`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/etcd");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `etcd`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `etcd`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     tracing::info!("Start generating `ca-config.json`...");
@@ -319,7 +319,7 @@ pub fn start(config: &Config) {
     tracing::info!("`etcd.service` generated");
 
     tracing::info!("Sending etcd to worker nodes...");
-    for (ip, _) in &config.instance_hosts {
+    for ip in config.instance_hosts.keys() {
         if *ip != config.instance_ip {
             Command::new("scp")
                 .arg("-r")
@@ -352,7 +352,7 @@ pub fn start(config: &Config) {
         .expect("Error happened when trying to start `etcd.service`");
     tracing::info!("Master is now etcd set");
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `etcd`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `etcd`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()

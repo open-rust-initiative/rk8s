@@ -1,9 +1,9 @@
 use crate::config::Config;
 use regex::Regex;
 use std::env;
-use std::path::Path;
 use std::fs::File;
 use std::io::Write;
+use std::path::Path;
 use std::process::Command;
 use std::{thread, time};
 
@@ -12,26 +12,20 @@ struct KubeletCfg;
 impl KubeletCfg {
     fn generate(current_ip: &String, current_name: &String) {
         let mut kubelet_conf = File::create(format!("to_send/{}/kubelet/kubelet.conf", current_ip))
-            .expect(
-                "Error happened when trying to create kubelet configuration file",
-            );
+            .expect("Error happened when trying to create kubelet configuration file");
 
         writeln!(
             &mut kubelet_conf,
-r#"KUBELET_OPTS="--logtostderr=false \
+            r#"KUBELET_OPTS="--logtostderr=false \
 --v=2 \
 --log-dir=/opt/kubernetes/logs \"#,
         )
         .expect("Error happened when trying to write `kubelet.conf`");
+        writeln!(&mut kubelet_conf, "--hostname-override={} \\", current_name)
+            .expect("Error happened when trying to write `kubelet.conf`");
         writeln!(
             &mut kubelet_conf,
-            "--hostname-override={} \\",
-            current_name
-        )
-        .expect("Error happened when trying to write `kubelet.conf`");
-        writeln!(
-            &mut kubelet_conf,
-r#"--network-plugin=cni \
+            r#"--network-plugin=cni \
 --kubeconfig=/opt/kubernetes/cfg/kubelet.kubeconfig \
 --bootstrap-kubeconfig=/opt/kubernetes/cfg/bootstrap.kubeconfig \
 --config=/opt/kubernetes/cfg/kubelet-config.yml \
@@ -48,13 +42,11 @@ struct KubeletConfig;
 impl KubeletConfig {
     fn generate() {
         let mut kubelet_config = File::create("to_send/kubelet-config.yml")
-            .expect(
-                "Error happened when trying to create kubelet configuration file",
-            );
+            .expect("Error happened when trying to create kubelet configuration file");
 
         writeln!(
             &mut kubelet_config,
-r#"kind: KubeletConfiguration
+            r#"kind: KubeletConfiguration
 apiVersion: kubelet.config.k8s.io/v1beta1
 address: 0.0.0.0
 port: 10250
@@ -121,7 +113,7 @@ pub fn start(config: &Config) {
     tracing::info!("Change working directory into `k8s`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/k8s");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `k8s`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `k8s`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     tracing::info!("Generating `kubelet-config.yml` to to_send/...");
@@ -210,7 +202,7 @@ pub fn start(config: &Config) {
             .output()
             .unwrap()
             .stdout;
-        if !(output.len() == 0) {
+        if !output.is_empty() {
             break;
         }
         tracing::info!("Waiting other etcd nodes to join cluster");
@@ -229,7 +221,7 @@ pub fn start(config: &Config) {
     let mut res = "";
     for word in output.split_whitespace() {
         if csr.is_match(word) {
-            res = word.clone();
+            res = word;
             break;
         }
     }
@@ -240,7 +232,7 @@ pub fn start(config: &Config) {
         .status()
         .expect("Error happened when trying to approve csr from node");
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `/rk8s`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `/rk8s`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()

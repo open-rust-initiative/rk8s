@@ -72,8 +72,7 @@ pub fn run_command() {
     // Change working directory
     let work_root = Path::new("/rk8s");
     if !work_root.is_dir() {
-        fs::create_dir("/rk8s")
-            .expect("Error happened when trying to create `/rk8s` directory");
+        fs::create_dir("/rk8s").expect("Error happened when trying to create `/rk8s` directory");
         fs::create_dir("/rk8s/cfg")
             .expect("Error happened when trying to create `/rk8s/cfg` directory");
         fs::create_dir("/rk8s/etcd")
@@ -85,7 +84,7 @@ pub fn run_command() {
         fs::create_dir("/rk8s/preparation")
             .expect("Error happened when trying to create `/rk8s/preparation` directory");
     }
-    env::set_current_dir(&work_root)
+    env::set_current_dir(work_root)
         .expect("Error happened when trying to change working directory");
 
     let cli = Cli::parse();
@@ -104,7 +103,7 @@ pub fn run_command() {
             deploy::kubectl::start(&adm_config);
             deploy::kubelet::start(&adm_config);
             deploy::kube_proxy::start(&adm_config);
-        },
+        }
         Commands::Precheck => {
             // Read configuration file.
             let adm_config = Config::init();
@@ -138,7 +137,7 @@ pub fn run_command() {
                 }
                 "cfssl" => {
                     tracing::info!("Installing cfssl...");
-                    install::cfssl::start(&adm_config);
+                    install::cfssl::start();
                     tracing::info!("cfssl installation complete");
                 }
                 "docker" => {

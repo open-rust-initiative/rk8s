@@ -1,17 +1,20 @@
+use std::env;
+use std::path::Path;
 use std::process::Command;
 
-use crate::config::Config;
-
-pub fn start(config: &Config) {
-    tracing::info!("Start downloading cfssl...");
-    Command::new("curl")
-        .arg("-L")
-        .arg(&config.cfssl_url)
-        .arg("-o")
+pub fn start() {
+    tracing::info!("Start Installing cfssl...");
+    let prev_dir = Path::new("/rk8s");
+    let work_dir = Path::new("/rk8s/preparation");
+    env::set_current_dir(work_dir)
+        .expect("Error happened when trying to change into `praparation`");
+    tracing::info!("Changed to {}", env::current_dir().unwrap().display());
+    Command::new("cp")
+        .arg("cfssl")
         .arg("/usr/local/bin/cfssl")
         .status()
-        .expect("Error happened when trying to download `cfssl`");
-    tracing::info!("cfssl downloaded");
+        .expect("Error happened when trying to copy `cfssl`");
+    tracing::info!("cfssl copied");
     Command::new("chmod")
         .arg("+x")
         .arg("/usr/local/bin/cfssl")
@@ -19,15 +22,13 @@ pub fn start(config: &Config) {
         .expect("Error happened when trying to set `cfssl` executable");
     tracing::info!("cfssl is ready");
 
-    tracing::info!("Start downloading cfssljson...");
-    Command::new("curl")
-        .arg("-L")
-        .arg(&config.cfssljson_url)
-        .arg("-o")
+    tracing::info!("Start installing cfssljson...");
+    Command::new("cp")
+        .arg("cfssljson")
         .arg("/usr/local/bin/cfssljson")
         .status()
-        .expect("Error happened when trying to download `cfssljson`");
-    tracing::info!("cfssljson downloaded");
+        .expect("Error happened when trying to copy `cfssljson`");
+    tracing::info!("cfssljson copied");
     Command::new("chmod")
         .arg("+x")
         .arg("/usr/local/bin/cfssljson")
@@ -35,19 +36,24 @@ pub fn start(config: &Config) {
         .expect("Error happened when trying to set `cfssljson` executable");
     tracing::info!("cfssljson is ready");
 
-    tracing::info!("Start downloading cfsslcertinfo...");
-    Command::new("curl")
-        .arg("-L")
-        .arg(&config.cfsslcertinfo_url)
-        .arg("-o")
+    tracing::info!("Start installing cfsslcertinfo...");
+    Command::new("cp")
+        .arg("cfssl-certinfo")
         .arg("/usr/local/bin/cfssl-certinfo")
         .status()
-        .expect("Error happened when trying to download `cfssl-certinfo`");
-    tracing::info!("cfssl-certinfo downloaded");
+        .expect("Error happened when trying to copy `cfssl-certinfo`");
+    tracing::info!("cfssl-certinfo copied");
     Command::new("chmod")
         .arg("+x")
         .arg("/usr/local/bin/cfssl-certinfo")
         .status()
         .expect("Error happened when trying to set `cfssl-certinfo` executable");
     tracing::info!("cfssl-certinfo is ready");
+
+    env::set_current_dir(prev_dir)
+        .expect("Error happened when trying to change into `praparation`");
+    tracing::info!(
+        "Change working directory back to {}",
+        env::current_dir().unwrap().display()
+    );
 }

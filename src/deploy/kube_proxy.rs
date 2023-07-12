@@ -1,9 +1,9 @@
 use crate::config::Config;
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::path::Path;
 use std::fs::File;
 use std::io::Write;
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 struct KubeProxyCfg;
@@ -11,13 +11,11 @@ struct KubeProxyCfg;
 impl KubeProxyCfg {
     fn generate() {
         let mut kube_proxy_conf = File::create("to_send/kube-proxy.conf")
-            .expect(
-                "Error happened when trying to create kube-proxy configuration file",
-            );
+            .expect("Error happened when trying to create kube-proxy configuration file");
 
         writeln!(
             &mut kube_proxy_conf,
-r#"KUBE_PROXY_OPTS="--logtostderr=false \
+            r#"KUBE_PROXY_OPTS="--logtostderr=false \
 --v=2 \
 --log-dir=/opt/kubernetes/logs \
 --config=/opt/kubernetes/cfg/kube-proxy-config.yml"
@@ -31,14 +29,15 @@ struct KubeProxyConfig;
 
 impl KubeProxyConfig {
     fn generate(current_ip: &String, current_name: &String) {
-        let mut kube_proxy_config = File::create(format!("to_send/{}/kube_proxy/kube-proxy-config.yml", current_ip))
-            .expect(
-                "Error happened when trying to create kube-proxy configuration file",
-            );
+        let mut kube_proxy_config = File::create(format!(
+            "to_send/{}/kube_proxy/kube-proxy-config.yml",
+            current_ip
+        ))
+        .expect("Error happened when trying to create kube-proxy configuration file");
 
         writeln!(
             &mut kube_proxy_config,
-r#"kind: KubeProxyConfiguration
+            r#"kind: KubeProxyConfiguration
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 bindAddress: 0.0.0.0
 metricsBindAddress: 0.0.0.0:10249
@@ -54,7 +53,7 @@ clientConnection:
         .expect("Error happened when trying to write `kube-proxy-config.yml`");
         writeln!(
             &mut kube_proxy_config,
-r#"clusterCIDR: 10.244.0.0/16
+            r#"clusterCIDR: 10.244.0.0/16
 "#,
         )
         .expect("Error happened when trying to write `kube-proxy-config.yml`");
@@ -136,7 +135,7 @@ pub fn start(config: &Config) {
     tracing::info!("Change working directory into `k8s`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/k8s");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `k8s`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `k8s`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     tracing::info!("Start generating `kube-proxy-csr.json`...");
@@ -147,13 +146,11 @@ pub fn start(config: &Config) {
         .expect("Error happened when trying to create `kube-proxy-csr.json`");
     kube_proxy_csr_file
         .write_all(content.as_bytes())
-        .expect(
-            "Error happened when trying to write content to `kube-proxy-csr.json`",
-        );
+        .expect("Error happened when trying to write content to `kube-proxy-csr.json`");
     tracing::info!("`kube-proxy-csr.json` generated");
 
     tracing::info!("Generating self-signed kube_proxy https certificate...");
-    let cfssl_kube_proxy= Command::new("cfssl")
+    let cfssl_kube_proxy = Command::new("cfssl")
         .arg("gencert")
         .arg("-ca=ca.pem")
         .arg("-ca-key=ca-key.pem")
@@ -223,8 +220,10 @@ pub fn start(config: &Config) {
                 .expect("Error happened when trying to execute kubectl");
             Command::new("ssh")
                 .arg(format!("root@{}", ip))
-                .arg("kubectl config set-context default --cluster=kubernetes --user=kube-proxy \
-                --kubeconfig=/opt/kubernetes/cfg/kube-proxy.kubeconfig")
+                .arg(
+                    "kubectl config set-context default --cluster=kubernetes --user=kube-proxy \
+                --kubeconfig=/opt/kubernetes/cfg/kube-proxy.kubeconfig",
+                )
                 .status()
                 .expect("Error happened when trying to execute kubectl");
             Command::new("ssh")
@@ -267,7 +266,7 @@ pub fn start(config: &Config) {
         }
     }
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `/rk8s`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `/rk8s`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()
