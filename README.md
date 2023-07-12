@@ -35,7 +35,9 @@ Then you should now have a working `rk8s` ready for deploying.
 
 3. `ssh-keygen` to generate a key for ssh connection across machines, and `ssh-copy-id -i <path/to/.pub> root@<IP address>` notifies machines to be deployed.
 
-4. Run `rk8s deploy`.
+4. `rk8s install cfssl` to install cfssl-related tools for later use.
+
+5. Run `rk8s deploy`.
 
 Then you should have a working cluster, ssh to the master node and run `kubectl get nodes`, you should see the master node is ready.
 

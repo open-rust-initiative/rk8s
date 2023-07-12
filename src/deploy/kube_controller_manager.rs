@@ -1,23 +1,22 @@
 use crate::config::Config;
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::path::Path;
 use std::fs::File;
 use std::io::Write;
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 struct KubeControllerManagerCfg;
 
 impl KubeControllerManagerCfg {
     fn generate() {
-        let mut controller_conf = File::create("to_send/kube-controller-manager.conf")
-            .expect(
-                "Error happened when trying to create kube-controller-manager configuration file",
-            );
+        let mut controller_conf = File::create("to_send/kube-controller-manager.conf").expect(
+            "Error happened when trying to create kube-controller-manager configuration file",
+        );
 
         writeln!(
             &mut controller_conf,
-r#"KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=false \
+            r#"KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=false \
 --v=2 \
 --log-dir=/opt/kubernetes/logs \
 --leader-elect=true \
@@ -111,7 +110,7 @@ pub fn start(config: &Config) {
     tracing::info!("Change working directory into `k8s`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/k8s");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `k8s`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `k8s`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     tracing::info!("Start generating `kube-controller-manager-csr.json`...");
@@ -224,7 +223,7 @@ pub fn start(config: &Config) {
         }
     }
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `/rk8s`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `/rk8s`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()

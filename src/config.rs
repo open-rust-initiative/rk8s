@@ -104,20 +104,12 @@ impl Config {
 pub fn generate_config_template() {
     let config = Config {
         instance_name: "master01".to_owned(),
-        instance_ip: "192.168.221.143".to_owned(),
+        instance_ip: "192.168.157.130".to_owned(),
         instance_hosts: {
             let mut map = HashMap::new();
             map.insert(
-                "192.168.221.143".to_owned(),
+                "192.168.157.130".to_owned(),
                 "master01".to_owned(),
-            );
-            map.insert(
-                "192.168.221.147".to_owned(),
-                "worker01".to_owned(),
-            );
-            map.insert(
-                "192.168.221.148".to_owned(),
-                "worker02".to_owned(),
             );
             map
         },

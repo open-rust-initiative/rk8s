@@ -117,7 +117,7 @@ impl ServerCsr {
                     "kubernetes.default.svc.cluster".to_string(),
                     "kubernetes.default.svc.cluster.local".to_string(),
                 ];
-                for (ip, _) in &config.instance_hosts {
+                for ip in config.instance_hosts.keys() {
                     hosts.push(ip.to_owned());
                 }
                 hosts
@@ -141,8 +141,11 @@ struct KubeApiserverCfg;
 
 impl KubeApiserverCfg {
     fn generate(current_ip: &String, config: &Config) {
-        let mut apiserver_conf = File::create(format!("to_send/{}/apiserver/kube-apiserver.conf", current_ip))
-            .expect("Error happened when trying to create kube-apiserver configuration file");
+        let mut apiserver_conf = File::create(format!(
+            "to_send/{}/apiserver/kube-apiserver.conf",
+            current_ip
+        ))
+        .expect("Error happened when trying to create kube-apiserver configuration file");
 
         writeln!(
             &mut apiserver_conf,
@@ -152,7 +155,7 @@ impl KubeApiserverCfg {
         )
         .expect("Error happened when trying to write `kube-apiserver.conf`");
         let mut buffer = String::new();
-        for (ip, _) in &config.instance_hosts {
+        for ip in config.instance_hosts.keys() {
             buffer.push_str(format!("https://{}:2379,", ip).as_str());
         }
         buffer.pop();
@@ -162,12 +165,8 @@ impl KubeApiserverCfg {
             .expect("Error happened when trying to write `kube-apiserver.conf`");
         writeln!(&mut apiserver_conf, "--secure-port=6443")
             .expect("Error happened when trying to write `kube-apiserver.conf`");
-        writeln!(
-            &mut apiserver_conf,
-            "--advertise-address={}",
-            current_ip
-        )
-        .expect("Error happened when trying to write `kube-apiserver.conf`");
+        writeln!(&mut apiserver_conf, "--advertise-address={}", current_ip)
+            .expect("Error happened when trying to write `kube-apiserver.conf`");
         writeln!(
             &mut apiserver_conf,
 r#"--allow-privileged=true \
@@ -229,13 +228,12 @@ WantedBy=multi-user.target
     }
 }
 
-
 pub fn start(config: &Config) {
     tracing::info!("kube_apiserver phase started");
     tracing::info!("Change working directory into `k8s`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/k8s");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `k8s`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `k8s`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     tracing::info!("Start generating `ca-config.json`...");
@@ -308,8 +306,8 @@ pub fn start(config: &Config) {
     tracing::info!("Self-signed CA certificate generated");
 
     tracing::info!("Generating `token.csv` to to_send/...");
-    let mut token = File::create("to_send/token.csv")
-        .expect("Error happened when trying to write token file");
+    let mut token =
+        File::create("to_send/token.csv").expect("Error happened when trying to write token file");
     token.write_all(b"4136692876ad4b01bb9dd0988480ebba,kubelet-bootstrap,10001,\"system:node-bootstrapper\"").expect("Error happened when trying to write `token.csv`");
     tracing::info!("`token.csv` generated");
 
@@ -370,7 +368,7 @@ pub fn start(config: &Config) {
         }
     }
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `/rk8s`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `/rk8s`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()

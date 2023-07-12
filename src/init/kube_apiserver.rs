@@ -117,7 +117,7 @@ impl ServerCsr {
                     "kubernetes.default.svc.cluster".to_string(),
                     "kubernetes.default.svc.cluster.local".to_string(),
                 ];
-                for (ip, _) in &config.instance_hosts {
+                for ip in config.instance_hosts.keys() {
                     hosts.push(ip.to_owned());
                 }
                 hosts
@@ -152,7 +152,7 @@ impl KubeApiserverCfg {
         )
         .expect("Error happened when trying to write `kube-apiserver.conf`");
         let mut buffer = String::new();
-        for (ip, _) in &config.instance_hosts {
+        for ip in config.instance_hosts.keys() {
             buffer.push_str(format!("https://{}:2379,", ip).as_str());
         }
         buffer.pop();
@@ -209,8 +209,9 @@ struct KubeApiserverUnit;
 
 impl KubeApiserverUnit {
     fn generate() {
-        let mut kube_apiserver_unit = File::create("/usr/lib/systemd/system/kube-apiserver.service")
-            .expect("Error happened when trying to create kube-apiserver unit file");
+        let mut kube_apiserver_unit =
+            File::create("/usr/lib/systemd/system/kube-apiserver.service")
+                .expect("Error happened when trying to create kube-apiserver unit file");
         let content = r#"[Unit]
 Description=Kubernetes API Server
 Documentation=https://github.com/kubernetes/kubernetes
@@ -229,13 +230,12 @@ WantedBy=multi-user.target
     }
 }
 
-
 pub fn start(config: &Config) {
     tracing::info!("kube_apiserver phase started");
     tracing::info!("Change working directory into `k8s`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/k8s");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `k8s`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `k8s`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     tracing::info!("Start generating `ca-config.json`...");
@@ -357,7 +357,7 @@ pub fn start(config: &Config) {
         .expect("Error happened when trying to start `kube-apiserver.service`");
     tracing::info!("Master's apiserver is now set");
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `/rk8s`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `/rk8s`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()

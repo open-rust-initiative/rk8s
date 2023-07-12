@@ -1,9 +1,9 @@
 use crate::config::Config;
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::path::Path;
 use std::fs::File;
 use std::io::Write;
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 #[allow(non_snake_case)]
@@ -56,7 +56,7 @@ pub fn start(config: &Config) {
     tracing::info!("Change working directory into `k8s`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/k8s");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `k8s`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `k8s`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     tracing::info!("Start generating `admin-csr.json`...");
@@ -67,9 +67,7 @@ pub fn start(config: &Config) {
         .expect("Error happened when trying to create `admin-csr.json`");
     admin_csr_file
         .write_all(content.as_bytes())
-        .expect(
-            "Error happened when trying to write content to `admin-csr.json`",
-        );
+        .expect("Error happened when trying to write content to `admin-csr.json`");
     tracing::info!("`admin-csr.json` generated");
 
     tracing::info!("Generating self-signed kubectl https certificate...");
@@ -123,8 +121,10 @@ pub fn start(config: &Config) {
                 .expect("Error happened when trying to execute kubectl");
             Command::new("ssh")
                 .arg(format!("root@{}", ip))
-                .arg("kubectl config set-context default --cluster=kubernetes --user=cluster-admin \
-                --kubeconfig=/root/.kube/config")
+                .arg(
+                    "kubectl config set-context default --cluster=kubernetes --user=cluster-admin \
+                --kubeconfig=/root/.kube/config",
+                )
                 .status()
                 .expect("Error happened when trying to execute kubectl");
             Command::new("ssh")
@@ -143,7 +143,7 @@ pub fn start(config: &Config) {
         }
     }
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `/rk8s`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `/rk8s`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()

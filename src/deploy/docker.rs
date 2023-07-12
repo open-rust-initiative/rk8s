@@ -1,9 +1,9 @@
-use std::process::Command;
-use std::path::{Path, PathBuf};
 use std::env;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
+use std::path::{Path, PathBuf};
+use std::process::Command;
 
 use crate::config::Config;
 
@@ -78,7 +78,7 @@ pub fn start(config: &Config) {
     tracing::info!("Change working directory into `docker`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/docker");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `etcd`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `etcd`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     // Prepare directory to be sent.
@@ -156,7 +156,7 @@ pub fn start(config: &Config) {
         tracing::info!("Docker started on {}", ip);
     }
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `etcd`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `etcd`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()

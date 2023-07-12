@@ -35,7 +35,7 @@ impl ETCDCfg {
             config.instance_ip
         )
         .expect("Error happened when trying to write `etcd.conf`");
-        writeln!(&mut etcd_conf, "").expect("Error happened when trying to write `etcd.conf`");
+        writeln!(&mut etcd_conf).expect("Error happened when trying to write `etcd.conf`");
         writeln!(&mut etcd_conf, "#[Clustering]")
             .expect("Error happened when trying to write `etcd.conf`");
         writeln!(

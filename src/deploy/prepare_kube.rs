@@ -1,7 +1,7 @@
 use crate::config::Config;
-use std::fs;
 use std::env;
-use std::path::{PathBuf, Path};
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 pub fn start(config: &Config) {
@@ -9,7 +9,7 @@ pub fn start(config: &Config) {
     tracing::info!("Change working directory into `k8s`");
     let prev_dir = Path::new("/rk8s");
     let work_dir = Path::new("/rk8s/k8s");
-    env::set_current_dir(&work_dir).expect("Error happened when trying to change into `k8s`");
+    env::set_current_dir(work_dir).expect("Error happened when trying to change into `k8s`");
     tracing::info!("Changed to {}", env::current_dir().unwrap().display());
 
     // Prepare directory to be sent.
@@ -45,7 +45,11 @@ pub fn start(config: &Config) {
     tracing::info!("Binaries prepared");
 
     for (ip, name) in &config.instance_hosts {
-        tracing::info!("Found node: {} on {}, sending kubernetes skeleton and worker binaries...", name, ip);
+        tracing::info!(
+            "Found node: {} on {}, sending kubernetes skeleton and worker binaries...",
+            name,
+            ip
+        );
         Command::new("scp")
             .arg("-r")
             .arg("to_send/kubernetes")
@@ -95,7 +99,7 @@ pub fn start(config: &Config) {
         check_dir_exist_or_create(kube_proxy_path);
     }
 
-    env::set_current_dir(&prev_dir).expect("Error happened when trying to change into `/rk8s`");
+    env::set_current_dir(prev_dir).expect("Error happened when trying to change into `/rk8s`");
     tracing::info!(
         "Change working directory back to {}",
         env::current_dir().unwrap().display()
